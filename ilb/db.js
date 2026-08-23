@@ -57,4 +57,4 @@ const db = {
   set nextCommentId(v) { _nextCommentId = v; }
 };
 
-export default db;
+module.exports = db;
