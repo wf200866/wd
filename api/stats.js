@@ -1,4 +1,4 @@
-import db from '../lib/db.js';
+const db = require('../lib/db.js');
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -6,7 +6,7 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -19,4 +19,4 @@ export default function handler(req, res) {
       users: db.users.length
     }
   });
-}
+};

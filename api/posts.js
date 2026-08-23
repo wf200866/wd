@@ -1,23 +1,24 @@
-import db from '../lib/db.js';
+const db = require('../lib/db.js');
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
 function authUser(req) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  const token = req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : null;
   if (!token) return null;
   return db.sessions.get(token) || null;
 }
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method === 'GET') {
-    const { category, keyword } = req.query;
+    const category = req.query.category;
+    const keyword = req.query.keyword;
     let list = [...db.posts];
     if (category && category !== '全部') {
       list = list.filter(p => p.category === category);
@@ -42,7 +43,8 @@ export default function handler(req, res) {
     const user = authUser(req);
     if (!user) return res.status(401).json({ code: 401, msg: '请先登录' });
 
-    const { title, content, category } = req.body || {};
+    const body = req.body || {};
+    const { title, content, category } = body;
     if (!title || !content) return res.json({ code: 1, msg: '标题和内容不能为空' });
     if (title.length > 50) return res.json({ code: 1, msg: '标题不超过 50 字' });
     if (content.length > 5000) return res.json({ code: 1, msg: '内容不超过 5000 字' });
@@ -69,4 +71,4 @@ export default function handler(req, res) {
   }
 
   return res.status(404).json({ code: 404, msg: '方法不允许' });
-}
+};

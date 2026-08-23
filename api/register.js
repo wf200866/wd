@@ -1,4 +1,4 @@
-import db from '../lib/db.js';
+const db = require('../lib/db.js');
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,7 +10,7 @@ function makeToken() {
   return 'tk_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -18,7 +18,8 @@ export default function handler(req, res) {
     return res.status(404).json({ code: 404, msg: '方法不允许' });
   }
 
-  const { username, password } = req.body || {};
+  const body = req.body || {};
+  const { username, password } = body;
   if (!username || !password) return res.json({ code: 1, msg: '用户名和密码不能为空' });
   if (username.length < 2 || username.length > 12) return res.json({ code: 1, msg: '用户名长度需在 2-12 之间' });
   if (password.length < 4) return res.json({ code: 1, msg: '密码至少 4 位' });
@@ -45,4 +46,4 @@ export default function handler(req, res) {
       user: { id: newUser.id, username: newUser.username, avatar: newUser.avatar, bio: newUser.bio, posts: 0 }
     }
   });
-}
+};

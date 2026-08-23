@@ -1,4 +1,4 @@
-import db from '../lib/db.js';
+const db = require('../lib/db.js');
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7,12 +7,12 @@ function cors(res) {
 }
 
 function authUser(req) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  const token = req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : null;
   if (!token) return null;
   return db.sessions.get(token) || null;
 }
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -23,7 +23,8 @@ export default function handler(req, res) {
   const user = authUser(req);
   if (!user) return res.status(401).json({ code: 401, msg: '请先登录' });
 
-  const { postId, content } = req.body || {};
+  const body = req.body || {};
+  const { postId, content } = body;
   if (!postId) return res.json({ code: 1, msg: '缺少 postId' });
   if (!content || !content.trim()) return res.json({ code: 1, msg: '评论内容不能为空' });
   if (content.length > 500) return res.json({ code: 1, msg: '评论不超过 500 字' });
@@ -44,4 +45,4 @@ export default function handler(req, res) {
   };
   db.comments.push(newComment);
   return res.json({ code: 0, msg: '评论成功', data: newComment });
-}
+};
